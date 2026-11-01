@@ -19,6 +19,7 @@ export function normalise(input={}){
   const year=Number(input.year??2025);
   getArchive(year);
   const mode=input.mode==='whatif'?'whatif':'replay';
+  if(mode==='whatif' && getArchive(year).coverage==='podium') throw new RangeError('What-if requires a complete recorded field');
   const going=['good','soft','heavy'].includes(input.going)?input.going:'soft';
   const strategy=[-1,0,1].includes(Number(input.strategy))?Number(input.strategy):0;
   const seed=String(input.seed??'QSOL-MCUP-001').slice(0,64)||'QSOL-MCUP-001';
@@ -89,7 +90,7 @@ export function orderAt(result,tick){
 export function receiptPayload(result){
   const {settings,frames,placings,version,archive}=result;
   return {schema:'qsol-melbcupsim/1',engine:version,settings,
-    historicalProvenance:{year:settings.year,date:archive.date,source:archive.source,observed:'published finish positions only',syntheticMotion:true},
+    historicalProvenance:{year:settings.year,date:archive.date,source:archive.source,secondarySource:archive.secondarySource??null,coverage:archive.coverage??'full',recordedRunners:archive.names.length,fieldSize:archive.fieldSize??archive.names.length,observed:archive.coverage==='podium'?'published top three only':'published full finishing order',syntheticMotion:true},
     outcome:placings,checkpoints:[0,100,200,300,420].map(tick=>({tick,positionsCm:frames[tick]})),
     replayInstructions:'Open simulator with settings; rebuild timeline; compare sha256 of JSON.stringify({engine,settings,frames,outcome}).'};
 }
