@@ -14,7 +14,7 @@ export function generator(seed){
   let state=hash32(String(seed))||0x9e3779b9;
   return ()=>{state^=state<<13;state^=state>>>17;state^=state<<5;return (state>>>0)/4294967296;};
 }
-const trit=next=>Math.floor(next[i]()*3)-1;
+const trit=next=>Math.floor(next()*3)-1;
 export function normalise(input={}){
   const year=Number(input.year??2025);
   getArchive(year);
