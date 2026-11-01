@@ -29,7 +29,7 @@ export function normalise(input={}){
 export function buildRace(raw={}){
   const settings=normalise(raw),race=getArchive(settings.year),n=race.names.length;
   const frames=[Array(n).fill(0)], finish=[];
-  const next=generator(ENGINE_VERSION+'|'+JSON.stringify(settings));
+  const next=generator(ENGINE_VERSION+'|RACE|'+settings.year+'|'+settings.seed);
   const profiles=race.names.map(name=>{
     const rng=generator(ENGINE_VERSION+'|PROFILE|'+name);
     return {wet:trit(rng),stay:trit(rng),form:trit(rng),weight:trit(rng),barrier:trit(rng)};
