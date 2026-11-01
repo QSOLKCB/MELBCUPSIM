@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a1421">
+<meta name="description" content="Deterministic, browser-only 8-bit Melbourne Cup simulator with sourced historical finishing orders and reproducible what-if races.">
+<title>MELBCUPSIM // The Deterministic Cup</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="identity"><div class="horse-icon" aria-hidden="true">♞</div><div><div class="eyebrow">QSOL-IMC ARCADE LAB / EXHIBIT 001</div><h1>MELB<span>CUP</span>SIM</h1><p>THE DETERMINISTIC CUP // 8-BIT EDITION</p></div></div>
+  <div class="mast-meta"><strong>3200 M</strong><span>FLEMINGTON · AUS</span><small>PURE WEB STANDARDS · NO SERVER</small></div>
+</header>
+<main>
+<section class="intro"><span class="led"></span> A seed-locked pixel racing playground. Race the past, change the conditions, verify the receipts. <strong>NO REAL-MONEY BETTING.</strong></section>
+<div class="shell">
+<aside class="panel controls">
+  <div class="section-title"><span>01</span> RACE CONTROL <small>CONFIGURE</small></div>
+  <label for="mode">RACE MODE</label><select id="mode"><option value="replay">Historical result replay</option><option value="whatif">What-if simulation</option></select>
+  <label for="year">CUP ARCHIVE</label><select id="year"><option value="2025">2025 · HALF YOURS</option><option value="2024">2024 · KNIGHT'S CHOICE</option><option value="2023">2023 · WITHOUT A FIGHT</option></select>
+  <label for="going">TRACK CONDITIONS</label><select id="going"><option value="good">GOOD · FAST</option><option value="soft" selected>SOFT · GIVE</option><option value="heavy">HEAVY · SLOG</option></select>
+  <label for="seed">DETERMINISTIC SEED</label><input id="seed" maxlength="64" value="QSOL-MCUP-001" spellcheck="false" autocomplete="off">
+  <label for="runner">FOLLOW RUNNER / TACTICAL CONTROL</label><select id="runner"></select>
+  <label for="strategy">TACTICAL PLAN <span class="ter">−1 / 0 / +1</span></label><select id="strategy"><option value="-1">−1 · SAVE FOR THE FINISH</option><option value="0" selected> 0 · BALANCED</option><option value="1">+1 · PUSH THE PACE</option></select>
+  <div class="hint" id="modeHint">Historical places are fixed to the published finishing order. Mid-race movement is illustrative.</div>
+  <div class="section-title second"><span>02</span> PLAYBACK <small>OPERATE</small></div>
+  <div class="button-row"><button class="primary" id="play">▶ START RACE</button><button id="reset">↺ RESET</button><button id="step" title="Advance one simulation tick">+1 TICK</button></div>
+  <label for="speed">PLAYBACK SPEED <output id="speedText">4×</output></label><input type="range" id="speed" min="1" max="8" value="4">
+  <label for="seek">RACE TIMELINE <output id="tickText">000 / 420</output></label><input type="range" id="seek" min="0" max="420" value="0">
+  <div class="button-row"><button id="share">↗ SHARE CONFIG</button><button id="export">⇩ JSON RECEIPT</button></div>
+  <p class="tiny" id="feedback" role="status" aria-live="polite">READY // LOAD A RACE</p>
+</aside>
+<section class="panel viewport">
+  <div class="viewbar"><div><span class="signal">●</span> LIVE PIXEL TRACK <span class="quiet">// SCHEMATIC FLEMINGTON</span></div><div id="simStatus">ARCHIVE · FIXED OUTCOME</div></div>
+  <div class="canvas-wrap"><canvas id="track" width="960" height="560" role="img" aria-label="8-bit animated overhead horse racing simulation. Text results appear in the leaderboard."></canvas><div class="corner-tag">8-BIT / 60 FPS DISPLAY</div></div>
+  <div class="telemetry"><div><small>DISTANCE LEAD</small><strong id="distance">0 M</strong></div><div><small>CURRENT LEADER</small><strong id="leader">—</strong></div><div><small>RACE PROGRESS</small><strong id="progress">0%</strong></div><div><small>DISPLAY STATE</small><strong id="playState">AT GATES</strong></div></div>
+  <div class="commentary" id="commentary" aria-live="polite">WELCOME TO FLEMINGTON. SELECT YOUR RACE AND HIT START.</div>
+  <div class="explain"><strong>DATA INTEGRITY:</strong> The historical result and its finishing order are sourced facts. The animation is a deterministic reconstruction, <em>not</em> actual sectional or GPS data. In what-if mode, runner attributes are generated for play and are not verified racing form.</div>
+</section>
+<aside class="panel standings">
+  <div class="section-title"><span>03</span> RACE DESK <small>STANDINGS</small></div>
+  <div class="result-title" id="raceTitle">2025 MELBOURNE CUP</div><p class="result-subtitle" id="resultNote">OFFICIAL FINISHING ORDER · ILLUSTRATIVE MOTION</p>
+  <div class="leaders-head"><span>POS</span><span>RUNNER</span><span>PROGRESS</span></div><div id="leaders" class="leaders" aria-label="Leaderboard"></div>
+  <div class="source-block"><div class="source-head">ARCHIVE SOURCE</div><a id="sourceLink" href="https://www.abc.net.au/" target="_blank" rel="noopener noreferrer">View published result ↗</a><div class="source-note">Race result from third-party reporting; not an official timing-data feed.</div></div>
+</aside>
+</div>
+<footer><div>QSOL-IMC / MELBCUPSIM <span class="quiet">· MPL? NO — ORIGINAL REPO APACHE-2.0</span></div><div>MODEL <span id="version">—</span> · ENTIRELY CLIENT-SIDE</div></footer>
+</main>
+<script type="module" src="./src/main.mjs"></script>
+</body>
+</html>
