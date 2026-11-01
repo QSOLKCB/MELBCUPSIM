@@ -55,7 +55,7 @@ export function buildRace(raw={}){
         const phase=tick/LAST_TICK, chosen=settings.runner===race.names[i];
         const tactical=chosen ? settings.strategy*(phase<.45?45:-55):0;
         const kick=phase>.55?34*p.stay:0;
-        const velocity=780+28*p.form+23*p.weight+13*p.barrier+32*p.wet*g-48*g+kick+tactical+Math.floor((next()-.5)*80);
+        const velocity=1050+28*p.form+23*p.weight+13*p.barrier+32*p.wet*g-48*g+kick+tactical+Math.floor((next()-.5)*80);
         d=distance[i]+Math.max(300,velocity);
       }
       const previous=distance[i];
@@ -63,7 +63,7 @@ export function buildRace(raw={}){
       if(distance[i]>=TRACK_CM&&settings.mode==='whatif'){
         finished[i]=true;
         // Fraction within fixed tick; no clock-time inference.
-        const delta=distance[i]-previous;
+        const delta=Math.max(1,Math.floor(d)-previous);
         const micro=Math.round((tick-1+(TRACK_CM-previous)/Math.max(1,delta))*1000000);
         finish.push({index:i,micro});
       }
