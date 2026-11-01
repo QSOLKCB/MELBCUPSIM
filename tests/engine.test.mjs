@@ -54,3 +54,14 @@ test('what-if finishers place uniquely and all runners eventually finish',()=>{
     assert.ok(x.frames.at(-1).every(cm=>cm===TRACK_CM));
   }
 });
+
+test('spectator selection alone cannot change motion or finish; tactics affect only selected horse',()=>{
+  const a=buildRace({year:2025,mode:'whatif',seed:'isolation',runner:'Half Yours',strategy:0});
+  const b=buildRace({year:2025,mode:'whatif',seed:'isolation',runner:'Goodie Two Shoes',strategy:0});
+  assert.deepEqual(a.frames,b.frames);
+  assert.deepEqual(a.placings,b.placings);
+  const aggressive=buildRace({year:2025,mode:'whatif',seed:'isolation',runner:'Half Yours',strategy:1});
+  for(let j=1;j<a.archive.names.length;j++){
+    assert.deepEqual(aggressive.frames.map(f=>f[j]),a.frames.map(f=>f[j]));
+  }
+});
