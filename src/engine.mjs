@@ -14,7 +14,7 @@ export function generator(seed){
   let state=hash32(String(seed))||0x9e3779b9;
   return ()=>{state^=state<<13;state^=state>>>17;state^=state<<5;return (state>>>0)/4294967296;};
 }
-const trit=next=>Math.floor(next()*3)-1;
+const trit=next=>Math.floor(next[i]()*3)-1;
 export function normalise(input={}){
   const year=Number(input.year??2025);
   getArchive(year);
@@ -29,7 +29,7 @@ export function normalise(input={}){
 export function buildRace(raw={}){
   const settings=normalise(raw),race=getArchive(settings.year),n=race.names.length;
   const frames=[Array(n).fill(0)], finish=[];
-  const next=generator(ENGINE_VERSION+'|RACE|'+settings.year+'|'+settings.seed);
+  const next=race.names.map((_,index)=>generator(ENGINE_VERSION+'|RACE|'+settings.year+'|'+settings.seed+'|'+index));
   const profiles=race.names.map(name=>{
     const rng=generator(ENGINE_VERSION+'|PROFILE|'+name);
     return {wet:trit(rng),stay:trit(rng),form:trit(rng),weight:trit(rng),barrier:trit(rng)};
@@ -47,7 +47,7 @@ export function buildRace(raw={}){
         }else{
           const finishTick=286+place*2;
           const base=Math.floor(TRACK_CM*Math.min(1,tick/finishTick));
-          const jitter=Math.floor((next()-.5)*2400);
+          const jitter=Math.floor((next[i]()-.5)*2400);
           d=tick>=finishTick?TRACK_CM:Math.min(TRACK_CM-1,Math.max(0,base+jitter));
         }
       }else{
@@ -55,7 +55,7 @@ export function buildRace(raw={}){
         const phase=tick/LAST_TICK, chosen=settings.runner===race.names[i];
         const tactical=chosen ? settings.strategy*(phase<.45?45:-55):0;
         const kick=phase>.55?34*p.stay:0;
-        const velocity=1050+28*p.form+23*p.weight+13*p.barrier+32*p.wet*g-48*g+kick+tactical+Math.floor((next()-.5)*80);
+        const velocity=1050+28*p.form+23*p.weight+13*p.barrier+32*p.wet*g-48*g+kick+tactical+Math.floor((next[i]()-.5)*80);
         d=distance[i]+Math.max(300,velocity);
       }
       const previous=distance[i];
