@@ -65,3 +65,32 @@ test('spectator selection alone cannot change motion or finish; tactics affect o
     assert.deepEqual(aggressive.frames.map(f=>f[j]),a.frames.map(f=>f[j]));
   }
 });
+
+test('historic full-field archives preserve 1988 Empire Rose and 2005 Makybe Diva',()=>{
+  for(const [year,first3,count] of [
+    [1988,['Empire Rose','Natski','Na Botto'],22],
+    [2005,['Makybe Diva','On A Jeune','Xcellent'],24]
+  ]){
+    const a=getArchive(year),x=buildRace({year,mode:'replay'});
+    assert.equal(a.coverage,'full');assert.equal(a.fieldSize,count);
+    assert.deepEqual(a.names.slice(0,3),first3);
+    assert.deepEqual(x.placings.map(p=>p.place),Array.from({length:count},(_,i)=>i+1));
+    assert.equal(x.frames.length,LAST_TICK+1);
+    assert.equal(canonicalRace(x),canonicalRace(buildRace({year,mode:'replay'})));
+  }
+});
+test('early podium exhibits cannot silently become fictional three-runner historical fields',()=>{
+  for(const [year,winner,size] of [
+    [1861,'Archer',17],[1930,'Phar Lap',15],[1983,'Kiwi',24],
+    [1987,'Kensei',21],[1989,'Tawrrific',23],[1990,'Kingston Rule',24]
+  ]){
+    const a=getArchive(year),x=buildRace({year,mode:'replay'});
+    assert.equal(a.coverage,'podium');
+    assert.equal(a.fieldSize,size);
+    assert.equal(a.names.length,3);
+    assert.equal(a.names[0],winner);
+    assert.deepEqual(x.placings.map(p=>p.place),[1,2,3]);
+    assert.equal(x.frames[0].length,3);
+    assert.throws(()=>buildRace({year,mode:'whatif'}),RangeError);
+  }
+});

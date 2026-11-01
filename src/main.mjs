@@ -1,4 +1,4 @@
-import {getArchive} from './data.mjs';
+import {ARCHIVE,getArchive} from './data.mjs';
 import {ENGINE_VERSION,TRACK_CM,LAST_TICK,buildRace,orderAt,receiptPayload,canonicalRace} from './engine.mjs';
 const $=id=>document.getElementById(id);
 const canvas=$('track'),ctx=canvas.getContext('2d',{alpha:false});
@@ -6,6 +6,14 @@ const colors=['#ffe37e','#ff7e9b','#7fece1','#e5a0ff','#8cc8ff','#ffbc72','#d3fc
 let result,tick=0,playing=false,lastFrame=0,accum=0,digest='';let serial=0;
 $('version').textContent=ENGINE_VERSION;
 const params=new URLSearchParams(location.search);
+// Populate the archive from source data; do not duplicate historical records in HTML.
+for(const year of Object.keys(ARCHIVE).map(Number).sort((a,b)=>b-a)){
+  const archive=ARCHIVE[year],option=document.createElement('option');
+  option.value=String(year);
+  option.textContent=year+' · '+archive.winner.toUpperCase()+(archive.coverage==='podium'?' [TOP 3]':' [FULL]');
+  $('year').append(option);
+}
+$('year').value='2025';
 for(const id of ['mode','year','going','seed','strategy']) if(params.has(id))$(id).value=params.get(id);
 function config(){return {mode:$('mode').value,year:$('year').value,going:$('going').value,seed:$('seed').value,runner:$('runner').value,strategy:Number($('strategy').value)};}
 function syncRunners(){const previous=$('runner').value;const archive=getArchive($('year').value);$('runner').replaceChildren();archive.names.forEach((name,i)=>{const o=document.createElement('option');o.value=name;o.textContent=String(i+1).padStart(2,'0')+' · '+name;$('runner').append(o);});const wanted=params.get('runner');$('runner').value=archive.names.includes(previous)?previous:archive.names.includes(wanted)?wanted:archive.names[0];}
@@ -14,10 +22,11 @@ function makeRace(){
   playing=false;tick=0;accum=0;lastFrame=0;syncMode();
   result=buildRace(config());digest='';$('seek').max=LAST_TICK;$('seek').value=0;
   $('raceTitle').textContent=result.settings.year+' MELBOURNE CUP';
-  $('resultNote').textContent=result.settings.mode==='replay'?'PUBLISHED FINISH · SYNTHETIC MOTION':'ALTERNATE TIMELINE · SYNTHETIC PERFORMANCE';
+  const partial=result.archive.coverage==='podium';
+  $('resultNote').textContent=result.settings.mode==='replay'?(partial?'TOP-3 EXHIBIT · '+result.archive.fieldSize+' HISTORICAL STARTERS · SYNTHETIC MOTION':'PUBLISHED FULL FIELD · SYNTHETIC MOTION'):'ALTERNATE TIMELINE · SYNTHETIC PERFORMANCE';
   $('sourceLink').href=result.archive.source;$('sourceLink').textContent=result.archive.sourceLabel+' ↗';
   $('play').textContent='▶ START RACE';$('simStatus').textContent=result.settings.mode==='replay'?'ARCHIVE · FIXED OUTCOME':'WHAT-IF · SIMULATED';
-  paint();updateHUD();statement('READY · '+result.archive.names.length+' STARTERS · '+ENGINE_VERSION);
+  paint();updateHUD();statement('READY · '+result.archive.names.length+(partial?' VERIFIED PODIUM FINISHERS OF '+result.archive.fieldSize+' HISTORICAL STARTERS':' DOCUMENTED RUNNERS')+' · '+ENGINE_VERSION);
   const ticket=++serial;
   if(globalThis.crypto?.subtle){
     const data=new TextEncoder().encode(canonicalRace(result));
@@ -29,9 +38,12 @@ function makeRace(){
   }else{statement('Race ready · cryptographic hashing requires HTTPS or localhost');}
 }
 function syncMode(){
+  const partial=getArchive($('year').value).coverage==='podium';
+  $('mode').querySelector('option[value="whatif"]').disabled=partial;
+  if(partial) $('mode').value='replay';
   const fixed=$('mode').value==='replay';
   $('going').disabled=fixed;$('strategy').disabled=fixed;
-  $('modeHint').textContent=fixed?'Published finishing order is fixed. Seed changes only the illustrative mid-race animation. Track and tactics do not alter published results.':'Counterfactual play. Ternary (-1/0/+1) profiles are fabricated for gameplay. Choose a runner, adjust conditions and tactics, then share the seed.';
+  $('modeHint').textContent=partial?'PODIUM SHOWCASE ONLY: the three displayed horses were part of a larger historical field. Unknown finishing places are not invented. What-if requires a complete field.':fixed?'Published finishing order is fixed. Seed affects illustrative animation only. Track and tactics do not change results.':'Counterfactual play: ternary horse traits are synthetic. Choose a runner, conditions and tactics.';
 }
 function start(){if(tick>=LAST_TICK)tick=0;playing=!playing;lastFrame=0;accum=0;$('play').textContent=playing?'Ⅱ PAUSE':'▶ RESUME';updateHUD();}
 $('play').addEventListener('click',start);
@@ -82,7 +94,7 @@ function drawCourse(){
   text('FINISH',835,212,12,'#ffdf89','center');
   text('MARIBYRNONG RIVER',45,477,10,'#8ccac4');
   text('PIXEL CIRCUIT / NOT TO SCALE',30,79,10,'#d2ddbe');
-  text(result.settings.mode==='replay'?'ARCHIVAL RECONSTRUCTION':'ALTERNATE UNIVERSE',30,96,10,'#c7f586');
+  text(result.archive.coverage==='podium'?'TOP THREE ONLY / OTHERS NOT DEPICTED':result.settings.mode==='replay'?'ARCHIVAL RECONSTRUCTION':'ALTERNATE UNIVERSE',30,96,10,'#c7f586');
 }
 function horse(x,y,index,angle,watched,step){
   ctx.save();ctx.translate(whole(x),whole(y));ctx.rotate(angle);
@@ -131,8 +143,8 @@ function updateHUD(){
     row.append(p,n,v);return row;
   }));
   let message;
-  if(tick===0)message='THE RUNNERS ARE LOADING INTO THE BARRIER. GOOD LUCK IN THE PIXEL PADDOCK!';
-  else if(complete)message=result.settings.mode==='replay'?'HISTORY HOLDS! '+result.archive.winner.toUpperCase()+' WINS THE '+result.settings.year+' CUP.':'CHECK THE PHOTO FINISH! '+ordered[0].name.toUpperCase()+' WINS THIS ALTERNATE TIMELINE.';
+  if(tick===0)message=result.archive.coverage==='podium'?'PODIUM EXHIBIT: THREE VERIFIED FINISHERS ONLY. '+(result.archive.fieldSize-3)+' OTHER HISTORICAL STARTERS NOT SHOWN.':'THE RUNNERS ARE LOADING INTO THE BARRIER. GOOD LUCK IN THE PIXEL PADDOCK!';
+  else if(complete)message=result.settings.mode==='replay'?'HISTORY HOLDS! '+result.archive.winner.toUpperCase()+' WINS THE '+result.settings.year+' CUP. '+(result.archive.coverage==='podium'?'ONLY THE TOP THREE WERE DEPICTED.':''):'CHECK THE PHOTO FINISH! '+ordered[0].name.toUpperCase()+' WINS THIS ALTERNATE TIMELINE.';
   else if(percent<25)message='AND THEY\'RE OFF! '+front.name.toUpperCase()+' SHOWS EARLY SPEED.';
   else if(percent<60)message='SETTLING INTO THE BACK STRETCH. '+front.name.toUpperCase()+' HAS THE ADVANTAGE.';
   else if(percent<85)message='THE FIELD IS TURNING FOR HOME! '+front.name.toUpperCase()+' LEADS THE CHARGE.';
