@@ -10,3 +10,12 @@
 - Track visual is an approximate stylized oval and does not claim to match the Flemington geometry or 3200m path precisely.
 - All race positions are monotonic, integer centimetres, bounded by 0..320000. Timelines are 421 states, ticks 0..420. Date, random clock time and real-time networking are not model inputs.
 - Changes to physics, PRNG, source archive, canonical serialization or rounding require an engine version bump and test fixtures to preserve compatibility.
+
+## Historical archive scope v0.2.0
+- Every race has evidence links, a documented field-size count, and coverage full or podium (legacy 2023–2025 records implicitly full).
+- Podium mode displays **only verified first-three**, without inventing missing horses or treating three as total starters.
+- What-if mode requires full coverage, enforced in engine as well as UI.
+- All historical animation, lane positions and progress are simulated, never claimed GPS or contemporaneous sectionals.
+- The 1988 full result is sourced to a secondary 22-place table with VRC podium corroboration; a complete independent primary-source reconciliation remains outstanding.
+- Earlier Cups may have used different course geometry and nominal distances. The modern 3200m oval remains schematic.
+- The historical archive update does not change the deterministic physics for original 2023–2025 records.
