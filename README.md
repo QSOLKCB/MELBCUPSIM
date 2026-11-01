@@ -1,5 +1,7 @@
 # MELBCUPSIM · THE DETERMINISTIC CUP 🏇
 
+MELBCUPSIM is a digital preservation and computational simulation project, not a gambling product. Its purpose is to make racing history playable, reproducible and educational.
+
 **A playable, NES-inspired Melbourne Cup race simulator in pure web standards.** Static HTML, CSS, Canvas 2D and JavaScript ES modules. No build step, no external packages, no backend and no betting.
 
 **[Play on GitHub Pages](https://qsolkcb.github.io/MELBCUPSIM/)** · [Source](https://github.com/QSOLKCB/MELBCUPSIM)
